@@ -73,7 +73,7 @@ app.post("/auth", asyncHandler(async (req: Request, res: Response) => {
 	// check if the passwords match
 	if (user && (await bcrypt.compare(password, user.hashedPassword))) {
 		res.json({
-			_id: user.id,
+			id: user.id,
 			name: user.name,
 			email: user.email
 		})
