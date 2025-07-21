@@ -8,10 +8,15 @@
     "start": "node --loader ts-node/esm backend/src/server.ts",
     "server": "nodemon --exec \"node --loader ts-node/esm\" backend/src/server.ts",
     "client": "npm start --prefix frontend",
+    "distStart": "node backend/dist/server.js",
+    "runDistNodemon": "nodemon dist/server.js",
+    "test": "nodemon --watch src --exec \"tsc && node dist/server.js\"",
+    "ts-server": "ts-node-dev --respawn backend/src/server.ts",
     "dev": "concurrently \" npm run server \" \"npm run client \"",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prisma:generate": "prisma generate --schema=backend/prisma/schema.prisma"
+    "test2": "echo \"Error: no test specified\" && exit 1",
+    "prisma:generate": "prisma generate --schema=backend/prisma/schema.prisma",
+    "kill-port": "kill-port 5000"
   },
   "keywords": [],
   "author": "",
@@ -21,18 +26,23 @@
     "axios": "^1.10.0",
     "bcrypt": "^6.0.0",
     "concurrently": "^9.2.0",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.0.1",
     "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.0.15",
     "prisma": "^6.12.0",
     "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
     "tsx": "^4.20.3",
     "typescript": "^5.8.3"
   }
