@@ -1,4 +1,4 @@
-import jwt, { Jwt } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import asyncHandler from "./asyncHandler.js";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prismaSingleton.ts";
