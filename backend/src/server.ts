@@ -91,7 +91,9 @@ app.post(
 			where: { email: normalizedEmail },
 		});
 
-		console.log("USER:", user);
+		console.log(
+			`UserId ${user?.id}: ${user?.name} with email: ${normalizedEmail}`
+		);
 		// check if the passwords match
 		if (user) {
 			const match = await bcrypt.compare(password, user.hashedPassword);
@@ -110,14 +112,23 @@ app.post(
 			res.status(401);
 			throw new Error("Invalid email or password");
 		}
-		//res.send("Authenticate Route here");
 	})
 );
 
 app.post(
 	"/logout",
+	protect,
 	asyncHandler((req: Request, res: Response) => {
-		res.status(201).json({ message: "Logged out successfully" });
+		if (!req.user) {
+			res.status(401);
+			throw new Error("No User found");
+		}
+		// set the jwt token to expire immediately
+		res.cookie("jwt", "", {
+			httpOnly: true,
+			expires: new Date(0),
+		});
+		res.status(200).json({ message: "Logged out successfully" });
 	})
 );
 
@@ -128,9 +139,18 @@ app.post("/googleOAuth", (req: Request, res: Response) => {
 // get all users
 app.get(
 	"/users",
-	protect,
 	asyncHandler(async (req: Request, res: Response) => {
-		const users = await prisma.user.findMany();
+		if (!req.user) {
+			res.status(401);
+			throw new Error("Not authorized, no user found");
+		}
+		const users = await prisma.user.findMany({
+			select: {
+				id: true,
+				name: true,
+				email: true,
+			},
+		});
 		res.json(users);
 	})
 );
