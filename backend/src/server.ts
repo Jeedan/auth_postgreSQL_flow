@@ -11,7 +11,7 @@ import { notFound, errorHandler } from "./middleware/errorHandler.ts";
 import asyncHandler from "./middleware/asyncHandler.ts";
 import generateToken from "./utils/generateToken.ts";
 import prisma from "./utils/prismaSingleton.ts";
-import protect from "./middleware/authMiddleware.ts";
+import { protect } from "./middleware/authMiddleware.ts";
 
 const app = express();
 
@@ -89,30 +89,45 @@ app.post(
 		const normalizedEmail = email.toLowerCase().trim();
 		const user = await prisma.user.findUnique({
 			where: { email: normalizedEmail },
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				hashedPassword: true,
+				role: true,
+			},
 		});
 
 		console.log(
-			`UserId ${user?.id}: ${user?.name} with email: ${normalizedEmail}`
+			`UserId ${user?.id}: ${user?.name} with email: ${normalizedEmail} and role: ${user?.role}`
 		);
 		// check if the passwords match
 		if (user) {
 			const match = await bcrypt.compare(password, user.hashedPassword);
 			console.log("PASSWORD MATCH:", match);
-			if (match) {
-				// generate a token and store it in a cookie
-				// we pass in user and grab what we need
-				// with our JwtPayload interface
-				generateToken(res, user);
-				// return a user without the password
-				res.status(200).json({
-					id: user.id,
-					name: user.name,
-					email: user.email,
-				});
+			if (!match) {
+				res.status(401);
+				throw new Error("Invalid email or password");
 			}
+
+			// generate a token and store it in a cookie
+			// we pass in user and grab what we need
+			// with our JwtPayload interface
+			generateToken(res, {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				role: user.role, // include the role in the token
+			});
+			// return a user without the password
+			res.status(200).json({
+				id: user.id,
+				name: user.name,
+				email: user.email,
+			});
 		} else {
 			res.status(401);
-			throw new Error("Invalid email or password");
+			throw new Error("User not found");
 		}
 	})
 );
@@ -130,6 +145,9 @@ app.post(
 			httpOnly: true,
 			expires: new Date(0),
 		});
+		console.log(
+			`UserId ${req.user.id}: ${req.user.name} logged out successfully`
+		);
 		res.status(200).json({ message: "Logged out successfully" });
 	})
 );

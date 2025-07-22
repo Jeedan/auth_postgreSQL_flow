@@ -1,4 +1,4 @@
-import { PrismaClient } from "../../generated/prisma/client.js";
+import { PrismaClient } from "@prisma/client";
 // todo: create a singleton for the prisma client to not use multiple by accident
 const prisma = new PrismaClient();
 

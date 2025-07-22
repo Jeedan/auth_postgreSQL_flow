@@ -2,10 +2,7 @@ import { Response } from "express";
 import jwt from "jsonwebtoken";
 import { JwtPayload } from "../types/jwtpayload.js";
 
-const generateToken = (
-	res: Response,
-	user: { id: string; email: string; name: string }
-) => {
+const generateToken = (res: Response, user: JwtPayload) => {
 	// console.log(`Generated token for userId: ${userId}`);
 	if (!process.env.JWT_SECRET) {
 		throw new Error(
@@ -19,6 +16,7 @@ const generateToken = (
 		id: user.id,
 		name: user.name,
 		email: user.email,
+		role: user.role,
 	};
 
 	const token = jwt.sign(payload, process.env.JWT_SECRET, {

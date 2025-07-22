@@ -31,6 +31,7 @@ const protect = asyncHandler(
 					id: true,
 					name: true,
 					email: true,
+					role: true, // include the role in the user object
 				},
 			});
 
@@ -53,4 +54,29 @@ const protect = asyncHandler(
 	}
 );
 
-export default protect;
+// authorization middleware
+// this checks for roles and permissions
+// like admin or editor or just specific permissions
+const authorize =
+	(requiredRole: string) =>
+	async (req: Request, res: Response, next: NextFunction) => {
+		const role = req.user?.role;
+		if (!req.user) {
+			return res.status(401).json({ message: "No user found" });
+		}
+
+		if (req.user.role !== requiredRole) {
+			return res.status(403).json({
+				message: `Forbidden, requires ${requiredRole} role to access`,
+			});
+		}
+
+		// check if we have requiredRole
+		// && check if the user's permissions include the required permissions
+		// if they don't return a 403 forbidden error missing permissions
+
+		// Authorized! We pass all the checks
+		next();
+	};
+
+export { protect };
