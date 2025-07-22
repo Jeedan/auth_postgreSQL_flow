@@ -100,7 +100,9 @@ app.post(
 			console.log("PASSWORD MATCH:", match);
 			if (match) {
 				// generate a token and store it in a cookie
-				generateToken(res, user.id);
+				// we pass in user and grab what we need
+				// with our JwtPayload interface
+				generateToken(res, user);
 				// return a user without the password
 				res.status(200).json({
 					id: user.id,
@@ -139,7 +141,9 @@ app.post("/googleOAuth", (req: Request, res: Response) => {
 // get all users
 app.get(
 	"/users",
+	protect,
 	asyncHandler(async (req: Request, res: Response) => {
+		console.log("from /users: ", req.user);
 		if (!req.user) {
 			res.status(401);
 			throw new Error("Not authorized, no user found");

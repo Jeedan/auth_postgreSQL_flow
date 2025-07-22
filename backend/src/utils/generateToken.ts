@@ -1,14 +1,27 @@
 import { Response } from "express";
 import jwt from "jsonwebtoken";
+import { JwtPayload } from "../types/jwtpayload.js";
 
-const generateToken = (res: Response, userId: String) => {
+const generateToken = (
+	res: Response,
+	user: { id: string; email: string; name: string }
+) => {
 	// console.log(`Generated token for userId: ${userId}`);
 	if (!process.env.JWT_SECRET) {
 		throw new Error(
 			"JWT_SECRET is not defined in the environment variables"
 		);
 	}
-	const token = jwt.sign({ userId }, process.env.JWT_SECRET, {
+
+	// create a payload of our JwtPayload
+	// type with the info we want to sign and store in the token
+	const payload: JwtPayload = {
+		id: user.id,
+		name: user.name,
+		email: user.email,
+	};
+
+	const token = jwt.sign(payload, process.env.JWT_SECRET, {
 		expiresIn: "30d",
 	});
 

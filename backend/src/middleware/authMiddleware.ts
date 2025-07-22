@@ -1,7 +1,8 @@
-import jwt from "jsonwebtoken";
+import jwt, { Jwt } from "jsonwebtoken";
 import asyncHandler from "./asyncHandler.js";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prismaSingleton.ts";
+import { JwtPayload } from "../types/jwtpayload.js";
 
 const protect = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -20,11 +21,12 @@ const protect = asyncHandler(
 		try {
 			// decode the token to get the ID
 			// process.env.JWT_SECRET! means its either of type string or undefined
-			const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-				userId: string;
-			};
+			const decoded = jwt.verify(
+				token,
+				process.env.JWT_SECRET!
+			) as JwtPayload;
 			const user = await prisma.user.findUnique({
-				where: { id: decoded.userId },
+				where: { id: decoded.id },
 				select: {
 					id: true,
 					name: true,
