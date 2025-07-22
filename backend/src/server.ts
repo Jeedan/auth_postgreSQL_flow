@@ -86,6 +86,11 @@ app.post(
 	"/auth",
 	asyncHandler(async (req: Request, res: Response) => {
 		const { email, password } = req.body;
+		// todo: use ZOD validation here
+		if (!email || !password) {
+			res.status(400);
+			throw new Error("Email and password are required");
+		}
 		const normalizedEmail = email.toLowerCase().trim();
 		const user = await prisma.user.findUnique({
 			where: { email: normalizedEmail },
@@ -101,34 +106,39 @@ app.post(
 		console.log(
 			`UserId ${user?.id}: ${user?.name} with email: ${normalizedEmail} and role: ${user?.role}`
 		);
-		// check if the passwords match
-		if (user) {
-			const match = await bcrypt.compare(password, user.hashedPassword);
-			console.log("PASSWORD MATCH:", match);
-			if (!match) {
-				res.status(401);
-				throw new Error("Invalid email or password");
-			}
-
-			// generate a token and store it in a cookie
-			// we pass in user and grab what we need
-			// with our JwtPayload interface
-			generateToken(res, {
-				id: user.id,
-				name: user.name,
-				email: user.email,
-				role: user.role, // include the role in the token
-			});
-			// return a user without the password
-			res.status(200).json({
-				id: user.id,
-				name: user.name,
-				email: user.email,
-			});
-		} else {
+		// to prevent timing attacks, user enumeration
+		// without this we return and throw the error too quickly
+		// giving hackers a way to know if the user exists
+		const dummyHash =
+			"$2b$10$KbQi1kd6P9zq0RZjFs1Qy.Qf5KxEZIEJjRsl7Rl6NslXhtQa6Xqfa";
+		if (!user) {
+			await bcrypt.compare(password, dummyHash);
 			res.status(401);
-			throw new Error("User not found");
+			throw new Error("Invalid email or password");
 		}
+		// check if the passwords match
+		const match = await bcrypt.compare(password, user.hashedPassword);
+		console.log("PASSWORD MATCH:", match);
+		if (!match) {
+			res.status(401);
+			throw new Error("Invalid email or password");
+		}
+
+		// generate a token and store it in a cookie
+		// we pass in user and grab what we need
+		// with our JwtPayload interface
+		generateToken(res, {
+			id: user.id,
+			name: user.name,
+			email: user.email,
+			role: user.role, // include the role in the token
+		});
+		// return a user without the password
+		res.status(200).json({
+			id: user.id,
+			name: user.name,
+			email: user.email,
+		});
 	})
 );
 

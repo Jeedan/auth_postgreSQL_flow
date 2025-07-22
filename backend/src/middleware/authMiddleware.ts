@@ -65,7 +65,7 @@ const authorize =
 			return res.status(401).json({ message: "No user found" });
 		}
 
-		if (req.user.role !== requiredRole) {
+		if (role !== requiredRole) {
 			return res.status(403).json({
 				message: `Forbidden, requires ${requiredRole} role to access`,
 			});
