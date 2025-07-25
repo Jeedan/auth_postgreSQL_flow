@@ -11,7 +11,8 @@ import { notFound, errorHandler } from "./middleware/errorHandler.ts";
 import asyncHandler from "./middleware/asyncHandler.ts";
 import generateToken from "./utils/generateToken.ts";
 import prisma from "./utils/prismaSingleton.ts";
-import { protect } from "./middleware/authMiddleware.ts";
+import { protect, validateZodSchema } from "./middleware/authMiddleware.ts";
+import { createUserSchema, loginUserSchema } from "./model/user.schema.ts";
 
 const app = express();
 
@@ -20,6 +21,7 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(cookieParser());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req: Request, res: Response) => {
 	res.send("API running on /");
@@ -28,6 +30,7 @@ app.get("/", (req: Request, res: Response) => {
 // auth routes
 app.post(
 	"/register",
+	validateZodSchema(createUserSchema),
 	asyncHandler(async (req: Request, res: Response) => {
 		const { name, email, password } = req.body;
 		// todo: change to ZOD validation
@@ -84,6 +87,7 @@ app.post(
 
 app.post(
 	"/auth",
+	validateZodSchema(loginUserSchema),
 	asyncHandler(async (req: Request, res: Response) => {
 		const { email, password } = req.body;
 		// todo: use ZOD validation here

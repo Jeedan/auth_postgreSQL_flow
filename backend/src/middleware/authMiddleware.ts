@@ -3,6 +3,7 @@ import asyncHandler from "./asyncHandler.js";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prismaSingleton.ts";
 import { JwtPayload } from "../types/jwtpayload.js";
+import { z, ZodError } from "zod";
 
 const protect = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -57,9 +58,8 @@ const protect = asyncHandler(
 // authorization middleware
 // this checks for roles and permissions
 // like admin or editor or just specific permissions
-const authorize =
-	(requiredRole: string) =>
-	async (req: Request, res: Response, next: NextFunction) => {
+const authorize = (requiredRole: string) =>
+	asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
 		const role = req.user?.role;
 		if (!req.user) {
 			return res.status(401).json({ message: "No user found" });
@@ -77,6 +77,27 @@ const authorize =
 
 		// Authorized! We pass all the checks
 		next();
+	});
+
+const validateZodSchema =
+	(schema: z.ZodObject<any, any>) =>
+	(req: Request, res: Response, next: NextFunction) => {
+		const result = schema.safeParse(req.body);
+
+		if (!result.success) {
+			const issues = result.error.issues.map((issue) => ({
+				path: issue.path.join("."),
+				message: issue.message,
+			}));
+			return res.status(400).json({
+				message: "Validation error",
+				errors: issues,
+				})
+			}
+
+		console.log("validated schema:", result.data);
+		req.body = result.data;
+		next();
 	};
 
-export { protect };
+export { protect, validateZodSchema, authorize };
