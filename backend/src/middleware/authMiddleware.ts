@@ -92,10 +92,11 @@ const validateZodSchema =
 			return res.status(400).json({
 				message: "Validation error",
 				errors: issues,
-				})
-			}
+			});
+		}
 
-		console.log("validated schema:", result.data);
+		const { password, ...safeBody } = result.data;
+		console.log("validated schema:", safeBody);
 		req.body = result.data;
 		next();
 	};
