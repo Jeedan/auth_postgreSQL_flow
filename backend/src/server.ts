@@ -3,16 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+import helmet from "helmet";
 import cors from "cors";
-import bcrypt from "bcrypt";
 import cookieParser from "cookie-parser";
 import { Request, Response } from "express";
 import { notFound, errorHandler } from "./middleware/errorHandler.ts";
-import asyncHandler from "./middleware/asyncHandler.ts";
-import generateToken from "./utils/generateToken.ts";
-import prisma from "./utils/prismaSingleton.ts";
-import { protect, validateZodSchema } from "./middleware/authMiddleware.ts";
-import { createUserSchema, loginUserSchema } from "./model/user.schema.ts";
 import userRoutes from "./routes/userRoutes.ts";
 
 const app = express();
@@ -20,7 +15,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors());
-app.use(cookieParser());
+app.use(cookieParser()); // parse cookies for JWT and other purposes
+app.use(helmet()); // Helmet helps secure Express apps by setting various HTTP headers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

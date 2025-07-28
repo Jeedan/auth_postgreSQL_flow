@@ -133,6 +133,7 @@ const logout = asyncHandler((req: Request, res: Response) => {
 	res.status(200).json({ message: "Logged out successfully" });
 });
 
+// get all users from the database
 const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 	console.log("from /users: ", req.user);
 	if (!req.user) {
@@ -146,7 +147,43 @@ const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 			email: true,
 		},
 	});
+
+	if (!users || users.length === 0) {
+		res.status(404);
+		throw new Error("No users found");
+	}
 	res.json(users);
 });
 
-export { registerUser, authenticateUser, logout, getAllUsers };
+const getUser = asyncHandler(async (req: Request, res: Response) => {
+	console.log("from /me: ", req.user);
+	// check if we even have a user
+	if (!req.user) {
+		res.status(401);
+		throw new Error("Not authorized, no user found");
+	}
+
+	const user = await prisma.user.findUnique({
+		where: { id: req.user?.id },
+		select: {
+			id: true,
+			name: true,
+			email: true,
+			role: true, // include the role in the response
+		},
+	});
+
+	if (!user) {
+		res.status(404);
+		throw new Error("User not found");
+	}
+
+	res.status(200).json({
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+	});
+});
+
+export { registerUser, authenticateUser, logout, getAllUsers, getUser };

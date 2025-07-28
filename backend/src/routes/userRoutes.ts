@@ -1,5 +1,4 @@
 import express from "express";
-import { Request, Response } from "express";
 import { protect, validateZodSchema } from "../middleware/authMiddleware.ts";
 import { createUserSchema, loginUserSchema } from "../model/user.schema.ts";
 import {
@@ -7,6 +6,7 @@ import {
 	registerUser,
 	logout,
 	getAllUsers,
+	getUser,
 } from "../controllers/userController.ts";
 
 const router = express.Router();
@@ -22,5 +22,7 @@ router
 router.post("/logout", protect, logout);
 
 router.get("/profiles", protect, getAllUsers);
+
+router.get("/me", protect, getUser);
 
 export default router;
