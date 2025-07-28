@@ -21,7 +21,11 @@ router
 
 router.post("/logout", protect, logout);
 
+// gets all users
 router.get("/profiles", protect, getAllUsers);
+
+// probably make this admin later on
+router.get("/:id", protect, getUser);
 
 router.get("/me", protect, getUser);
 
