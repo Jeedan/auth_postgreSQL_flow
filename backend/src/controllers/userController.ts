@@ -60,7 +60,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
 	const { email, password } = req.body;
 	// todo need to protect password here
-	console.log("Before authenticate: ", req.body);
+	console.log("Before authenticate: ", email);
 	// todo: use ZOD validation here
 	if (!email || !password) {
 		res.status(400);
