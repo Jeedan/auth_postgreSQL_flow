@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, validateZodSchema } from "../middleware/authMiddleware.ts";
+import { authRateLimiter } from "../middleware/rateLimiter.ts";
 import { createUserSchema, loginUserSchema } from "../model/user.schema.ts";
 import {
 	authenticateUser,
@@ -13,11 +14,15 @@ const router = express.Router();
 
 router
 	.route("/register")
-	.post(validateZodSchema(createUserSchema), registerUser);
+	.post(authRateLimiter, validateZodSchema(createUserSchema), registerUser);
 
 router
 	.route("/auth")
-	.post(validateZodSchema(loginUserSchema), authenticateUser);
+	.post(
+		authRateLimiter,
+		validateZodSchema(loginUserSchema),
+		authenticateUser
+	);
 
 router.post("/logout", protect, logout);
 
