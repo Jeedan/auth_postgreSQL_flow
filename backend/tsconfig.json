@@ -17,7 +17,6 @@
     "forceConsistentCasingInFileNames": true,            /* Ensure that casing is correct in imports. */
     /* Type Checking */
     "strict": true,
-
     "allowJs": true,               // allow JS files, helps with node_modules sometimes
     "moduleDetection": "force",   // forces TS to treat all files as modules
     "noEmit": false,               // no output, because we run TS directly
