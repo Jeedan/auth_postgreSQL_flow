@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "server": "nodemon backend/src/server.ts",
+    "servtest": "nodemon --loader ts-node/esm backend/src/server.ts",
     "nodemonStart": "concurrently \"tsc --watch --project backend\" \"nodemon\"",
     "dev": "concurrently \" npm run nodemonStart \" \"npm run client \"",
     "client": "npm start --prefix frontend",
