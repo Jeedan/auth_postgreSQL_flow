@@ -6,7 +6,12 @@ const notFound = (req: Request, res: Response, next: NextFunction) => {
 	next(error);
 };
 
-const errorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (
+	err: any,
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
 	let statuscode = res.statusCode === 200 ? 500 : res.statusCode;
 	let message = err.message;
 	// check DB for a bad ID or cast Error
