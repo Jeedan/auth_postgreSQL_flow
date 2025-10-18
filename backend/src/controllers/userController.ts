@@ -1,10 +1,10 @@
 import asyncHandler from "../middleware/asyncHandler.ts";
-import { Request, Response } from "express";
+import { RequestHandler } from "express";
 import generateToken from "../utils/generateToken.ts";
 import bcrypt from "bcrypt";
 import prisma from "../utils/prismaSingleton.ts";
 
-const registerUser = asyncHandler(async (req: Request, res: Response) => {
+const registerUser: RequestHandler = asyncHandler(async (req, res) => {
 	const { name, email, password } = req.body;
 	// todo: change to ZOD validation
 	//const passwordSchema = z.string().min(isDev ? 1 : 8);
@@ -57,7 +57,7 @@ const registerUser = asyncHandler(async (req: Request, res: Response) => {
 	//res.send("Register Route here");
 });
 
-const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
+const authenticateUser: RequestHandler = asyncHandler(async (req, res) => {
 	const { email, password } = req.body;
 	// todo need to protect password here
 	console.log("Before authenticate: ", email);
@@ -117,7 +117,7 @@ const authenticateUser = asyncHandler(async (req: Request, res: Response) => {
 	});
 });
 
-const logout = asyncHandler((req: Request, res: Response) => {
+const logout: RequestHandler = asyncHandler((req, res) => {
 	if (!req.user) {
 		res.status(401);
 		throw new Error("No User found");
@@ -134,7 +134,7 @@ const logout = asyncHandler((req: Request, res: Response) => {
 });
 
 // get all users from the database
-const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
+const getAllUsers: RequestHandler = asyncHandler(async (req, res) => {
 	console.log("from /users: ", req.user);
 	if (!req.user) {
 		res.status(401);
@@ -155,7 +155,7 @@ const getAllUsers = asyncHandler(async (req: Request, res: Response) => {
 	res.json(users);
 });
 
-const getUser = asyncHandler(async (req: Request, res: Response) => {
+const getUser: RequestHandler = asyncHandler(async (req, res) => {
 	// check if we even have a user
 	if (!req.user) {
 		res.status(401);
@@ -186,7 +186,7 @@ const getUser = asyncHandler(async (req: Request, res: Response) => {
 	});
 });
 
-const getUserById = asyncHandler(async (req: Request, res: Response) => {
+const getUserById: RequestHandler = asyncHandler(async (req, res) => {
 	const { id: userId } = req.params;
 	// check if we even have a user
 	if (!req.user) {
