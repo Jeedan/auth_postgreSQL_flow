@@ -20,7 +20,7 @@ const PasswordInput = () => {
 			<Label htmlFor="password">Password</Label>
 			<InputGroup>
 				<InputGroupInput
-					placeholder="Enter password"
+					placeholder={showPassword ? "Enter password" : "*********"}
 					type={showPassword ? "text" : "password"}
 				/>
 				<InputGroupAddon align="inline-end">
