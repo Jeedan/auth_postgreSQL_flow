@@ -1,10 +1,12 @@
-import Signup from "./routes/Signup";
+import SignIn from "./routes/SignIn";
+import SignUp from "./routes/Signup";
 
 function App() {
 	return (
 		<>
-			<div className="h-dvh flex justify-center items-center">
-				<Signup />
+			<div className="h-dvh flex gap-2 justify-center items-center">
+				<SignUp />
+				<SignIn />
 			</div>
 		</>
 	);
