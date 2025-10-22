@@ -11,16 +11,10 @@ import {
 } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import type { Dispatch, SetStateAction } from "react";
-interface PasswordInputProps {
-	showPassword: boolean;
-	setShowPassword: Dispatch<SetStateAction<boolean>>;
-}
+import { useState } from "react";
 
-const PasswordInput = ({
-	showPassword,
-	setShowPassword,
-}: PasswordInputProps) => {
+const PasswordInput = () => {
+	const [showPassword, setShowPassword] = useState<boolean>(false);
 	return (
 		<div className="grid gap-2">
 			<Label htmlFor="password">Password</Label>

@@ -11,14 +11,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
 
 const Signup = () => {
-	const [showPassword, setShowPassword] = useState(false);
-
-	const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
 	return (
 		<Card className="w-full max-w-sm">
 			<CardHeader>
@@ -58,16 +53,10 @@ const Signup = () => {
 							/>
 						</div>
 						{/* password */}
-						<PasswordInput
-							showPassword={showPassword}
-							setShowPassword={setShowPassword}
-						/>
+						<PasswordInput />
 
 						{/* confirm password */}
-						<PasswordInput
-							showPassword={showConfirmPassword}
-							setShowPassword={setShowConfirmPassword}
-						/>
+						<PasswordInput />
 					</div>
 				</form>
 			</CardContent>
