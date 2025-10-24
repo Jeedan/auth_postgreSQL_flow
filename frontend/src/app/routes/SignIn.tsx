@@ -11,19 +11,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import PasswordInput from "@/components/PasswordInput";
+import PasswordInput from "@/app/components/PasswordInput";
+import { useState } from "react";
 
-const Signup = () => {
+const SignIn = () => {
+	const [showPassword, setShowPassword] = useState<boolean>(false);
 	return (
 		<Card className="w-full max-w-sm">
 			<CardHeader>
-				<CardTitle className="text-3xl">Sign Up</CardTitle>
+				<CardTitle className="text-3xl">Sign In</CardTitle>
 				<CardDescription>
-					Enter a name, email and password to create an account.
+					Enter your email and password to sign in.
 				</CardDescription>
 				<CardAction>
 					<Button variant="link" className="cursor-pointer">
-						Sign In
+						Create Account
 					</Button>
 				</CardAction>
 			</CardHeader>
@@ -32,16 +34,6 @@ const Signup = () => {
 			<CardContent>
 				<form>
 					<div className="flex flex-col gap-6">
-						{/* Name */}
-						<div className="grid gap-2">
-							<Label htmlFor="name">Name</Label>
-							<Input
-								id="name"
-								type="name"
-								placeholder="John Doe"
-								required
-							/>
-						</div>
 						{/* Email */}
 						<div className="grid gap-2">
 							<Label htmlFor="email">Email</Label>
@@ -53,17 +45,18 @@ const Signup = () => {
 							/>
 						</div>
 						{/* password */}
-						<PasswordInput />
-
-						{/* confirm password */}
-						<PasswordInput />
+						{/* custom component */}
+						<PasswordInput
+							showPassword={showPassword}
+							setShowPassword={setShowPassword}
+						/>
 					</div>
 				</form>
 			</CardContent>
 			{/* Footer will have the submit button and then the Social OAuth*/}
 			<CardFooter className="flex flex-col gap-2 ">
 				<Button type="submit" className="w-full cursor-pointer">
-					Create Account
+					Sign In
 				</Button>
 
 				<div className="flex w-full items-center justify-center gap-2 ">
@@ -107,4 +100,4 @@ const Signup = () => {
 	);
 };
 
-export default Signup;
+export default SignIn;

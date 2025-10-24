@@ -11,19 +11,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import PasswordInput from "@/components/PasswordInput";
+import PasswordInput from "@/app/components/PasswordInput";
+import { useState } from "react";
 
-const SignIn = () => {
+const Signup = () => {
+	const [showPassword, setShowPassword] = useState<boolean>(false);
+	const [showConfirmPassword, setConfirmShowPassword] =
+		useState<boolean>(false);
 	return (
 		<Card className="w-full max-w-sm">
 			<CardHeader>
-				<CardTitle className="text-3xl">Sign In</CardTitle>
+				<CardTitle className="text-3xl">Sign Up</CardTitle>
 				<CardDescription>
-					Enter your email and password to sign in.
+					Enter a name, email and password to create an account.
 				</CardDescription>
 				<CardAction>
 					<Button variant="link" className="cursor-pointer">
-						Create Account
+						Sign In
 					</Button>
 				</CardAction>
 			</CardHeader>
@@ -32,6 +36,16 @@ const SignIn = () => {
 			<CardContent>
 				<form>
 					<div className="flex flex-col gap-6">
+						{/* Name */}
+						<div className="grid gap-2">
+							<Label htmlFor="name">Name</Label>
+							<Input
+								id="name"
+								type="name"
+								placeholder="John Doe"
+								required
+							/>
+						</div>
 						{/* Email */}
 						<div className="grid gap-2">
 							<Label htmlFor="email">Email</Label>
@@ -43,15 +57,24 @@ const SignIn = () => {
 							/>
 						</div>
 						{/* password */}
-						{/* custom component */}
-						<PasswordInput />
+						<PasswordInput
+							showPassword={showPassword}
+							setShowPassword={setShowPassword}
+						/>
+
+						{/* confirm password */}
+						<PasswordInput
+							label="Confirm Password"
+							showPassword={showConfirmPassword}
+							setShowPassword={setConfirmShowPassword}
+						/>
 					</div>
 				</form>
 			</CardContent>
 			{/* Footer will have the submit button and then the Social OAuth*/}
 			<CardFooter className="flex flex-col gap-2 ">
 				<Button type="submit" className="w-full cursor-pointer">
-					Sign In
+					Create Account
 				</Button>
 
 				<div className="flex w-full items-center justify-center gap-2 ">
@@ -95,4 +118,4 @@ const SignIn = () => {
 	);
 };
 
-export default SignIn;
+export default Signup;

@@ -11,13 +11,21 @@ import {
 } from "@/components/ui/tooltip";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
 
-const PasswordInput = () => {
-	const [showPassword, setShowPassword] = useState<boolean>(false);
+interface PasswordInputProps {
+	label?: string;
+	showPassword: boolean;
+	setShowPassword: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+const PasswordInput = ({
+	label = "Password",
+	showPassword,
+	setShowPassword,
+}: PasswordInputProps) => {
 	return (
 		<div className="grid gap-2">
-			<Label htmlFor="password">Password</Label>
+			<Label htmlFor="password">{label}</Label>
 			<InputGroup>
 				<InputGroupInput
 					placeholder={showPassword ? "Enter password" : "*********"}

@@ -3,7 +3,7 @@ import asyncHandler from "./asyncHandler.js";
 import { NextFunction, Request, Response } from "express";
 import prisma from "../utils/prismaSingleton.ts";
 import { JwtPayload } from "../types/jwtpayload.js";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 
 const protect = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -42,7 +42,8 @@ const protect = asyncHandler(
 			}
 
 			// store it on the request object
-			// we created global types for this in the root
+			// we created global types for this in the root folder
+			// types\express\index.d.ts
 			req.user = user;
 			// move to next middleware
 			next();

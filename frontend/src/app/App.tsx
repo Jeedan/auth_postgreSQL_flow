@@ -1,7 +1,7 @@
 import { ModeToggle } from "./components/ModeToggle";
 import SignIn from "./routes/SignIn";
 import SignUp from "./routes/Signup";
-import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ThemeProvider } from "@/app/components/theme/theme-provider";
 
 function App() {
 	return (
