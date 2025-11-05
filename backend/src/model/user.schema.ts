@@ -19,6 +19,7 @@ const nameSchema = z
 	.min(3, "Name must be at least 3 characters long")
 	.transform((value) => sanitizeString(value));
 
+// TODO:
 // Only validated, not escaped (to preserve hashing integrity)
 // in production use this for stronger passwords
 //.refine((value) => validator.isStrongPassword(value, { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1, }), { message: "Password must include at least 1 lowercase letter, 1 uppercase letter, 1 number and 1 symbol and be at least 8 characters long." });
@@ -37,4 +38,13 @@ const loginUserSchema = z.object({
 	password: passwordSchema,
 });
 
-export { createUserSchema, loginUserSchema };
+const registerUserSchema = loginUserSchema
+	.extend({
+		name: nameSchema,
+		confirmPassword: passwordSchema,
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Passwords do not match",
+		path: ["confirmPassword"],
+	});
+export { createUserSchema, loginUserSchema, registerUserSchema };

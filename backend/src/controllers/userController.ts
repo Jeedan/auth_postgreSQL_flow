@@ -1,123 +1,51 @@
 import asyncHandler from "../middleware/asyncHandler.ts";
-import { RequestHandler } from "express";
-import generateToken from "../utils/generateToken.ts";
+import type { RequestHandler } from "express";
+import generateToken, {
+	refreshTokenSignOptions,
+	verifyToken,
+} from "../utils/jwt.ts";
 import bcrypt from "bcrypt";
 import prisma from "../utils/prismaSingleton.ts";
+import {
+	createAccount,
+	loginUser,
+	refreshUserAccessToken,
+} from "../services/auth.service.ts";
+import {
+	accessTokenName,
+	clearAuthCookies,
+	getAccessTokenCookieOptions,
+	getRefreshTokenCookieOptions,
+	refreshTokenName,
+	setAuthCookies,
+} from "../utils/cookies.ts";
+import { CREATED, NOT_FOUND, OK, UNAUTHORIZED } from "../constants/http.ts";
+import appAssert from "../utils/appAssert.ts";
 
-const registerUser: RequestHandler = asyncHandler(async (req, res) => {
-	const { name, email, password } = req.body;
-	// todo: change to ZOD validation
-	//const passwordSchema = z.string().min(isDev ? 1 : 8);
-	const isDevelopment = process.env.NODE_ENV === "development";
-	if (!isDevelopment && password.length < 8) {
-		res.status(400);
-		throw new Error("Password must be at least 8 characters long");
-	}
+const registerUserHandler = asyncHandler(async (req, res) => {
+	// these console logs don't trigger
+	console.log("NEW REGISTER USER TEST: ", req.body);
+	const { userWithoutPassword, accessToken, refreshToken } =
+		await createAccount(req.body);
 
-	const normalizedEmail = email.toLowerCase().trim();
-
-	if (!name || !email || !password) {
-		res.status(400);
-		throw new Error("All fields are required");
-	}
-
-	// Check if the user already exists
-	const userExists = await prisma.user.findUnique({
-		where: {
-			email: normalizedEmail,
-		},
-	});
-
-	if (userExists) {
-		res.status(400);
-		throw new Error("User already exists!");
-	}
-
-	// has the password before we create the user
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(password, salt);
-
-	//create the new user
-	const user = await prisma.user.create({
-		data: {
-			name,
-			email: normalizedEmail,
-			hashedPassword,
-		},
-	});
-
-	// respond with the user data but omitting the password
-	if (user) {
-		res.status(201).json({
-			_id: user.id,
-			name: user.name,
-			email: user.email,
-		});
-	}
-	//res.send("Register Route here");
+	return setAuthCookies({ res, accessToken, refreshToken })
+		.status(CREATED)
+		.json({ user: userWithoutPassword });
 });
 
-const authenticateUser: RequestHandler = asyncHandler(async (req, res) => {
-	const { email, password } = req.body;
-	// todo need to protect password here
-	console.log("Before authenticate: ", email);
-	// todo: use ZOD validation here
-	if (!email || !password) {
-		res.status(400);
-		throw new Error("Email and password are required");
-	}
-	const normalizedEmail = email.toLowerCase().trim();
-	const user = await prisma.user.findUnique({
-		where: { email: normalizedEmail },
-		select: {
-			id: true,
-			name: true,
-			email: true,
-			hashedPassword: true,
-			role: true,
-		},
-	});
-
-	console.log(
-		`UserId ${user?.id}: ${user?.name} with email: ${normalizedEmail} and role: ${user?.role}`
-	);
-	// to prevent timing attacks, user enumeration
-	// without this we return and throw the error too quickly
-	// giving hackers a way to know if the user exists
-	const dummyHash =
-		"$2b$10$KbQi1kd6P9zq0RZjFs1Qy.Qf5KxEZIEJjRsl7Rl6NslXhtQa6Xqfa";
-	if (!user) {
-		await bcrypt.compare(password, dummyHash);
-		res.status(401);
-		throw new Error("Invalid email or password");
-	}
-	// check if the passwords match
-	const match = await bcrypt.compare(password, user.hashedPassword);
-	console.log("PASSWORD MATCH:", match);
-	if (!match) {
-		res.status(401);
-		throw new Error("Invalid email or password");
-	}
-
-	// generate a token and store it in a cookie
-	// we pass in user and grab what we need
-	// with our JwtPayload interface
-	generateToken(res, {
-		id: user.id,
-		name: user.name,
-		email: user.email,
-		role: user.role, // include the role in the token
-	});
-
-	// return a user without the password
-	res.status(200).json({
-		id: user.id,
-		name: user.name,
-		email: user.email,
+const loginHandler: RequestHandler = asyncHandler(async (req, res) => {
+	const { accessToken, refreshToken } = await loginUser(req.body);
+	console.log("LOGIN HANDLER:", req.body);
+	// set cookies
+	return setAuthCookies({ res, accessToken, refreshToken }).status(OK).json({
+		message: "Login successful",
 	});
 });
 
 const logout: RequestHandler = asyncHandler((req, res) => {
+	const accessToken = req.cookies.accessToken as string | undefined;
+	const { payload } = verifyToken(accessToken || "");
+
 	if (!req.user) {
 		res.status(401);
 		throw new Error("No User found");
@@ -127,19 +55,42 @@ const logout: RequestHandler = asyncHandler((req, res) => {
 		httpOnly: true,
 		expires: new Date(0),
 	});
+
 	console.log(
 		`UserId ${req.user.id}: ${req.user.name} logged out successfully`
 	);
-	res.status(200).json({ message: "Logged out successfully" });
+	return clearAuthCookies(res)
+		.status(OK)
+		.json({ message: "Logged out successfully" });
+});
+
+const refreshTokenHandler: RequestHandler = asyncHandler(async (req, res) => {
+	const refreshToken = req.cookies.refreshToken as string | undefined;
+	appAssert(refreshToken, UNAUTHORIZED, "No refresh token provided");
+	// refresh tokens
+	const { accessToken, newRefreshToken } = await refreshUserAccessToken(
+		refreshToken
+	);
+
+	if (newRefreshToken) {
+		console.log("handler: ", newRefreshToken);
+
+		res.cookie(
+			refreshTokenName,
+			newRefreshToken,
+			getRefreshTokenCookieOptions()
+		);
+	}
+
+	return res
+		.status(OK)
+		.cookie(accessTokenName, accessToken, getAccessTokenCookieOptions())
+		.json({ message: "Access Token refreshed" });
 });
 
 // get all users from the database
 const getAllUsers: RequestHandler = asyncHandler(async (req, res) => {
 	console.log("from /users: ", req.user);
-	if (!req.user) {
-		res.status(401);
-		throw new Error("Not authorized, no user found");
-	}
 	const users = await prisma.user.findMany({
 		select: {
 			id: true,
@@ -148,19 +99,15 @@ const getAllUsers: RequestHandler = asyncHandler(async (req, res) => {
 		},
 	});
 
-	if (!users || users.length === 0) {
-		res.status(404);
-		throw new Error("No users found");
-	}
+	// check if we have users
+	appAssert(users, NOT_FOUND, "No users found");
+
 	res.json(users);
 });
 
 const getUser: RequestHandler = asyncHandler(async (req, res) => {
 	// check if we even have a user
-	if (!req.user) {
-		res.status(401);
-		throw new Error("Not authorized, no user found");
-	}
+	appAssert(req.user, UNAUTHORIZED, "Not authorized or no user found");
 
 	const user = await prisma.user.findUnique({
 		where: { id: req.user.id },
@@ -172,10 +119,8 @@ const getUser: RequestHandler = asyncHandler(async (req, res) => {
 		},
 	});
 
-	if (!user) {
-		res.status(404);
-		throw new Error("User not found");
-	}
+	appAssert(user, NOT_FOUND, "User not found");
+
 	console.log("from /me: ", user);
 
 	res.status(200).json({
@@ -219,10 +164,11 @@ const getUserById: RequestHandler = asyncHandler(async (req, res) => {
 });
 
 export {
-	registerUser,
-	authenticateUser,
+	registerUserHandler as registerUserTest,
+	loginHandler,
 	logout,
 	getAllUsers,
 	getUser,
 	getUserById,
+	refreshTokenHandler,
 };

@@ -6,7 +6,7 @@ dotenv.config();
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { notFound, errorHandler } from "./middleware/errorHandler.ts";
 import userRoutes from "./routes/userRoutes.ts";
 
@@ -24,6 +24,7 @@ app.get("/", (req: Request, res: Response) => {
 	res.send("API running on /");
 });
 
+console.log("Mounting AGAIN");
 // user routes
 app.use("/api/users", userRoutes);
 
