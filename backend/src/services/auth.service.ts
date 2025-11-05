@@ -125,6 +125,7 @@ export const loginUser = async ({ email, password }: LoginParams) => {
 	return { user: userWithoutPassword, accessToken, refreshToken };
 };
 
+// refresh user accessToken and refreshToken if expired
 export const refreshUserAccessToken = async (refreshToken: string) => {
 	// check if we have a refresh token
 	appAssert(refreshToken, UNAUTHORIZED, "No refresh token provided");
